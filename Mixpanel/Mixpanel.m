@@ -6,13 +6,13 @@
 
 #import <objc/runtime.h>
 #import "Mixpanel.h"
-#import "MixpanelPrivate.h"
 #import "MixpanelPeople.h"
 #import "MixpanelPeoplePrivate.h"
-#import "MPNetworkPrivate.h"
-
-#import "MPLogger.h"
+#import "MixpanelPrivate.h"
 #import "MPFoundation.h"
+#import "MPLogger.h"
+#import "MPNetworkPrivate.h"
+#import "NSThread+MPHelpers.h"
 
 #if defined(MIXPANEL_WATCHOS)
 #import "MixpanelWatchProperties.h"
@@ -440,22 +440,24 @@ static NSString *defaultProjectToken;
 
 #if !MIXPANEL_NO_NOTIFICATION_AB_TEST_SUPPORT
 - (void)setupAutomaticPushTracking {
-    SEL selector = nil;
-    Class cls = [[UIApplication sharedApplication].delegate class];
-    if (class_getInstanceMethod(cls, NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:"))) {
-        selector = NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:");
-    } else if (class_getInstanceMethod(cls, NSSelectorFromString(@"application:didReceiveRemoteNotification:"))) {
-        selector = NSSelectorFromString(@"application:didReceiveRemoteNotification:");
-    }
+    [NSThread mp_safelyRunOnMainThreadSync:^{
+        SEL selector = nil;
+        Class cls = [[UIApplication sharedApplication].delegate class];
+        if (class_getInstanceMethod(cls, NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:"))) {
+            selector = NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:");
+        } else if (class_getInstanceMethod(cls, NSSelectorFromString(@"application:didReceiveRemoteNotification:"))) {
+            selector = NSSelectorFromString(@"application:didReceiveRemoteNotification:");
+        }
 
-    if (selector) {
-        [MPSwizzler swizzleSelector:selector
-                            onClass:cls
-                          withBlock:^(id view, SEL command, UIApplication *application, NSDictionary *userInfo) {
-                              [self trackPushNotification:userInfo];
-                          }
-                              named:@"notification opened"];
-    }
+        if (selector) {
+            [MPSwizzler swizzleSelector:selector
+                                onClass:cls
+                              withBlock:^(id view, SEL command, UIApplication *application, NSDictionary *userInfo) {
+                                  [self trackPushNotification:userInfo];
+                              }
+                                  named:@"notification opened"];
+        }
+    }];
 }
 
 - (void)trackPushNotification:(NSDictionary *)userInfo event:(NSString *)event
