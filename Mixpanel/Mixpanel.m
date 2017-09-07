@@ -985,10 +985,10 @@ static NSString *defaultProjectToken;
     UIDevice *device = [UIDevice currentDevice];
     CGSize size = [UIScreen mainScreen].bounds.size;
     return @{
-             @"$os": [device systemName],
+//             @"$os": [device systemName],
              @"$os_version": [device systemVersion],
-             @"$screen_height": @((NSInteger)size.height),
-             @"$screen_width": @((NSInteger)size.width),
+//             @"$screen_height": @((NSInteger)size.height),
+//             @"$screen_width": @((NSInteger)size.width),
              };
 #endif
 }
@@ -1003,19 +1003,19 @@ static NSString *defaultProjectToken;
     [p setValue:[[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"] forKey:@"$app_release"];
     [p setValue:[[NSBundle mainBundle] infoDictionary][@"CFBundleVersion"] forKey:@"$app_build_number"];
     [p setValue:[[NSBundle mainBundle] infoDictionary][@"CFBundleShortVersionString"] forKey:@"$app_version_string"];
-    [p setValue:[self IFA] forKey:@"$ios_ifa"];
+//    [p setValue:[self IFA] forKey:@"$ios_ifa"];
     
 #if !MIXPANEL_NO_REACHABILITY_SUPPORT
-    CTCarrier *carrier = [self.telephonyInfo subscriberCellularProvider];
-    [p setValue:carrier.carrierName forKey:@"$carrier"];
+//    CTCarrier *carrier = [self.telephonyInfo subscriberCellularProvider];
+//    [p setValue:carrier.carrierName forKey:@"$carrier"];
 #endif
 
     [p addEntriesFromDictionary:@{
-                                  @"mp_lib": @"iphone",
-                                  @"$lib_version": [self libVersion],
-                                  @"$manufacturer": @"Apple",
-                                  @"$model": deviceModel,
-                                  @"mp_device_model": deviceModel, //legacy
+//                                  @"mp_lib": @"iphone",
+//                                  @"$lib_version": [self libVersion],
+//                                  @"$manufacturer": @"Apple",
+//                                  @"$model": deviceModel,
+//                                  @"mp_device_model": deviceModel, //legacy
                                   }];
     [p addEntriesFromDictionary:[self collectDeviceProperties]];
     return [p copy];
